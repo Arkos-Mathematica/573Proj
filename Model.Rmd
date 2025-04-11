@@ -117,6 +117,10 @@ class(m.cv)
 ```
 
 
+```{r}
+# foo bar
+```
+
 ## LASSO/ridge/elastic net - Ari
 
 ## PCA - Ari
