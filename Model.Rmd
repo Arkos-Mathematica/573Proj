@@ -1,0 +1,126 @@
+---
+title: "573 Group Project"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+# The Model
+
+## Preparing the Data
+
+```{r}
+data <- read.csv("data/train.csv")
+data[is.na(data)]<-0
+
+# factor the appropriate columns
+data$MSSubClass <- factor(data$MSSubClass)
+data$MSZoning <- factor(data$MSZoning)
+data$Street <- factor(data$Street)
+data$Alley <- factor(data$Alley)
+data$LotShape <- factor(data$LotShape)
+data$LandContour <- factor(data$LandContour)
+data$Utilities <- factor(data$Utilities)
+data$LotConfig <- factor(data$LotConfig)
+data$LandSlope <- factor(data$LandSlope)
+data$Neighborhood <- factor(data$Neighborhood)
+data$Condition1 <- factor(data$Condition1)
+data$Condition2 <- factor(data$Condition2)
+data$BldgType <- factor(data$BldgType)
+data$HouseStyle <- factor(data$HouseStyle)
+data$RoofStyle <- factor(data$RoofStyle)
+data$RoofMatl <- factor(data$RoofMatl)
+data$Exterior1st <- factor(data$Exterior1st)
+data$Exterior2nd <- factor(data$Exterior2nd)
+data$MasVnrType <- factor(data$MasVnrType)
+data$ExterQual <- factor(data$ExterQual)
+data$ExterCond <- factor(data$ExterCond)
+data$Foundation <- factor(data$Foundation)
+data$BsmtQual <- factor(data$BsmtQual)
+data$BsmtCond <- factor(data$BsmtCond)
+data$BsmtExposure <- factor(data$BsmtExposure)
+data$BsmtFinType1 <- factor(data$BsmtFinType1)
+data$BsmtFinType2 <- factor(data$BsmtFinType2)
+data$Heating <- factor(data$Heating)
+data$HeatingQC <- factor(data$HeatingQC)
+data$CentralAir <- factor(data$CentralAir)
+data$Electrical <- factor(data$Electrical)
+data$KitchenQual <- factor(data$KitchenQual)
+data$Functional <- factor(data$Functional)
+data$FireplaceQu <- factor(data$FireplaceQu)
+data$GarageType <- factor(data$GarageType)
+data$GarageFinish <- factor(data$GarageFinish)
+data$GarageCond <- factor(data$GarageCond)
+data$PoolQC <- factor(data$PoolQC)
+data$Fence <- factor(data$Fence)
+data$MiscFeature <- factor(data$MiscFeature)
+data$SaleType <- factor(data$SaleType)
+data$SaleCondition <- factor(data$SaleCondition)
+```
+
+## Exploratory visuals
+
+This confirms that the data broadly looks how we expect it to.
+
+```{r}
+plot(data$OverallQual,log(data$SalePrice))
+
+bp <- boxplot(log(data$SalePrice) ~ data$Exterior1st, data = data, col = c("lightblue", "darkblue"), xaxt = "n")
+tick <- seq_along(bp$names)
+axis(1, at = tick, labels = FALSE)
+text(tick, par("usr")[3] - 0.3, bp$names, srt = 90, xpd = TRUE)
+plot(data$FullBath,log(data$SalePrice))
+```
+Here, I examine which factor variables might be worth dropping.
+
+```{r}
+library(ggplot2)
+
+plotbar <- function(i){
+     if (is.factor(get(i))){
+         ggplot(data, aes(x=get(i))) + geom_bar() + ggtitle(i)
+     }
+}
+```
+
+Breaking this into two chunks to more easily isolate the function
+
+```{r}
+library(gridExtra)
+
+plots <- lapply(names(data),plotbar)
+plots[sapply(plots, is.null)] <- NULL # drop the null values
+length(plots)
+gridExtra::grid.arrange( grobs = plots, nrow = 7) # you might want to run this row separately and use the 'zoom' feature to the right to pop out the result for better visibility
+```
+
+## linear regression - Ari
+
+Since the outcome variable is housing prices, we will examine whether log transformation of the outcome variable will better fit our data:
+
+```{r}
+attach(data)
+linbase <- glm(SalePrice~.-Id,data = data)
+linlog <- glm(log(SalePrice)~. -Id, data = data)
+summary(linbase)
+summary(linlog)
+```
+
+```{r}
+library(boot)
+m.cv<- try(cv.glm(data, linbase, K=2)) #First try
+class(m.cv) #Sometimes error, sometimes list
+while (inherits(m.cv, "try-error") ) {
+m.cv<- try(cv.glm(data, linbase, K=2))
+}
+class(m.cv)
+#cv.glm(data , linbase , K = 5)$delta[1]
+#cv.glm(data , linlog , K = 5)$delta[1]
+```
+
+
+## LASSO/ridge/elastic net - Ari
+
+## PCA - Ari
+
+## regression trees and random forests, - Ari
+
+## Boosting - Ari
