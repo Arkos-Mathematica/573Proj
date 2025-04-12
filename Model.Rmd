@@ -303,9 +303,35 @@ min(cv.out$cvm)
 
 Using an elastic net with alpha of 0.5, the lowest mean Cross-Validated error is 0.02203126, with lambda of 0.005171966.
 
-## PCA - Ari
+## PCR and PLS - Ari
+
+Beginning with PCR:
+
+```{r}
+library(pls)
+```
+
+```{r}
+pcr.fit <- pcr(log(SalePrice) ~., data = data.cl, scale = TRUE, validation = "CV")
+summary(pcr.fit)
+validationplot(pcr.fit, val.type = "MSEP")
+```
+
+We see that the CV levels out at around 9 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 9 components is $0.1589^2 = 0.02524921$, which is higher than the lasso, ridge, and elastic net regressions.
+
+Since we have an outcome variable, supervised learning is possible. Consequently, Partial Least Squares is preferred to Principal Component Analysis. 
+
+```{r}
+pls.fit <- plsr(log(SalePrice) ~., data = data.cl, scale = TRUE, validation = "CV")
+summary(pls.fit)
+validationplot(pls.fit, val.type = "MSEP")
+```
+
+We see that the CV levels out at around 3 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 3 components is $0.1520^2 = 0.023104$, which is higher than the lasso, ridge, and elastic net regressions, but lower than PCR.
 
 ## regression trees and random forests, - Ari
+
+
 
 ## Boosting - Ari
 
