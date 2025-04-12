@@ -372,4 +372,15 @@ mean(rf$mse)
 
 MSE [appears to be](https://datajobs.com/data-science-repo/Random-Forest-%5bLiaw-and-Weiner%5d.pdf) based on out of bag predictions, so I use that in lieu of K-fold cross validation to get an MSE of 0.02006823, which is competitive with — if not better than — dimension reduction or regularization approaches.
 
-## Boosting - Ari
+## Boosting
+
+```{r}
+library(gbm)
+boost <- gbm(log(SalePrice)~., data = data.cl, distribution = "gaussian", n.trees = 5000, interaction.depth = 4, cv.folds = 5)
+summary(boost)
+plot(boost, i = "OverallQual")
+plot(boost, i = "GrLivArea")
+mean(boost$cv.error)
+```
+With 5-fold cross-validation, the MSE was 0.01866449. This is a dramatic improvement from the single tree.
+
