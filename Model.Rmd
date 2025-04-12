@@ -3,6 +3,7 @@ title: "573 Group Project"
 output: pdf_document
 date: "`r Sys.Date()`"
 ---
+
 # The Model
 
 ## Preparing the Data
@@ -71,6 +72,7 @@ axis(1, at = tick, labels = FALSE)
 text(tick, par("usr")[3] - 0.3, bp$names, srt = 90, xpd = TRUE)
 plot(data$FullBath,log(data$SalePrice))
 ```
+
 Here, I examine which factor variables might be worth dropping.
 
 ```{r}
@@ -225,6 +227,7 @@ library(boot)
 cv.glm(data.cl, linbase , K = 5)$delta[1]
 cv.glm(data.cl, linlog , K = 5)$delta[1]
 ```
+
 Keep in mind that, since y-values are on different axes, it is entirely inappropriate to compare cv output. This was a proof of concept. See the residual plots below for model evaluations:
 
 ```{r}
@@ -263,7 +266,6 @@ min(cv.out$cvm)
 
 Using a lasso regression, the lowest mean Cross-Validated error is 0.02154846, with lambda of 0.003751818
 
-
 ### Ridge
 
 ```{r}
@@ -284,7 +286,6 @@ min(cv.out$cvm)
 Using a ridge regression, the lowest mean Cross-Validated error is 0.02218426, with lambda of 0.0625841
 
 ### Elastic Net
-
 
 ```{r}
 grid <- 10^ seq(10, -2, length = 100)
@@ -319,7 +320,7 @@ validationplot(pcr.fit, val.type = "MSEP")
 
 We see that the CV levels out at around 9 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 9 components is $0.1589^2 = 0.02524921$, which is higher than the lasso, ridge, and elastic net regressions.
 
-Since we have an outcome variable, supervised learning is possible. Consequently, Partial Least Squares is preferred to Principal Component Analysis. 
+Since we have an outcome variable, supervised learning is possible. Consequently, Partial Least Squares is preferred to Principal Component Analysis.
 
 ```{r}
 pls.fit <- plsr(log(SalePrice) ~., data = data.cl, scale = TRUE, validation = "CV")
@@ -329,12 +330,46 @@ validationplot(pls.fit, val.type = "MSEP")
 
 We see that the CV levels out at around 3 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 3 components is $0.1520^2 = 0.023104$, which is higher than the lasso, ridge, and elastic net regressions, but lower than PCR.
 
-## regression trees and random forests, - Ari
+## regression trees and random forests
 
+```{r}
+library(tree)
+```
 
+### The tree
+
+```{r}
+tree.reg <- tree(log(SalePrice)~., data = data.cl, control = tree.control(nobs = length(data.cl[,1]), mindev = 0) )
+summary(tree.reg)
+plot(tree.reg)
+text(tree.reg, pretty = 0)
+cv.reg <- cv.tree(tree.reg, K=10)
+print(cv.reg)
+```
+
+```{r}
+plot(cv.reg$size, cv.reg$dev, type = "b")
+```
+
+The optimal tree size appears to be 11. Let's make one of th that size
+
+```{r}
+pruned <- prune.tree(tree.reg, best = 11)
+plot(pruned)
+text(pruned, pretty = 0)
+```
+
+Referring back to the cross-validation, we see that thesum of squared errors for the size-eleven tree is 77.12415. To get the *Mean Squared Error* we divide by the number of observations: $\frac{77.12415}{1460} =  0.05282476$. This is considerably worse than dimension reduction or regularization approaches, as would be expected.
+
+### Random Forest
+
+```{r}
+library(randomForest)
+rf <- randomForest(log(SalePrice)~., data = data.cl, importance = TRUE)# use default mtry values
+varImpPlot(rf)
+mean(rf$mse)
+```
+
+MSE [appears to be](https://datajobs.com/data-science-repo/Random-Forest-%5bLiaw-and-Weiner%5d.pdf) based on out of bag predictions, so I use that in lieu of K-fold cross validation to get an MSE of 0.02006823, which is competitive with — if not better than — dimension reduction or regularization approaches.
 
 ## Boosting - Ari
-
-
-
-
