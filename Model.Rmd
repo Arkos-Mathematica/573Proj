@@ -225,9 +225,83 @@ library(boot)
 cv.glm(data.cl, linbase , K = 5)$delta[1]
 cv.glm(data.cl, linlog , K = 5)$delta[1]
 ```
+Keep in mind that, since y-values are on different axes, it is entirely inappropriate to compare cv output. This was a proof of concept. See the residual plots below for model evaluations:
 
+```{r}
+par(mfrow=c(2,2))
+plot(linbase)
+plot(linlog)
+```
+
+By visual inspection, the models seem similar, though the log outcome variable may be slightly more appropriate, which aligns with our intuition that prices should be measured on a log scale.
 
 ## LASSO/ridge/elastic net - Ari
+
+```{r}
+library(glmnet)
+
+x <- model.matrix(log(SalePrice)~.,data.cl)[, -1]
+y <- log(data.cl$SalePrice)
+```
+
+### Lasso
+
+```{r}
+grid <- 10^ seq(10, -2, length = 100)
+lasso.mod <- glmnet(x, y, alpha = 1, lambda = grid)
+plot(lasso.mod, main="Lasso")
+```
+
+Cross Validation:
+
+```{r}
+cv.out <- cv.glmnet(x,y, alpha = 1)
+plot(cv.out)
+cv.out$lambda.min
+min(cv.out$cvm)
+```
+
+Using a lasso regression, the lowest mean Cross-Validated error is 0.02154846, with lambda of 0.003751818
+
+
+### Ridge
+
+```{r}
+grid <- 10^ seq(10, -2, length = 100)
+ridge.mod <- glmnet(x, y, alpha = 0, lambda = grid)
+plot(ridge.mod, main="ridge")
+```
+
+Cross Validation:
+
+```{r}
+cv.out <- cv.glmnet(x,y, alpha = 0)
+plot(cv.out)
+cv.out$lambda.min
+min(cv.out$cvm)
+```
+
+Using a ridge regression, the lowest mean Cross-Validated error is 0.02218426, with lambda of 0.0625841
+
+### Elastic Net
+
+
+```{r}
+grid <- 10^ seq(10, -2, length = 100)
+ridge.mod <- glmnet(x, y, alpha = .5, lambda = grid)
+plot(ridge.mod, main="Elastic Net")
+```
+
+Cross Validation:
+
+```{r}
+cv.out <- cv.glmnet(x,y, alpha = .5)
+plot(cv.out)
+cv.out$lambda.min
+min(cv.out$cvm)
+```
+
+Using an elastic net with alpha of 0.5, the lowest mean Cross-Validated error is 0.02203126, with lambda of 0.005171966.
 
 ## PCA - Ari
 
