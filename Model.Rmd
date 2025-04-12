@@ -8,7 +8,7 @@ date: "`r Sys.Date()`"
 ## Preparing the Data
 
 ```{r}
-data <- read.csv("data/train.csv")
+data <- read.csv("train.csv")
 data[is.na(data)]<-0
 
 # factor the appropriate columns
@@ -84,6 +84,7 @@ plotbar <- function(i){
 Breaking this into two chunks to more easily isolate the function
 
 ```{r}
+attach(data)
 library(gridExtra)
 
 plots <- lapply(names(data),plotbar)
@@ -117,10 +118,6 @@ class(m.cv)
 ```
 
 
-```{r}
-# foo bar
-```
-
 ## LASSO/ridge/elastic net - Ari
 
 ## PCA - Ari
@@ -128,3 +125,110 @@ class(m.cv)
 ## regression trees and random forests, - Ari
 
 ## Boosting - Ari
+
+
+```{r}
+# Clearing data - Lily
+library(forcats)
+
+#SaleCondition
+plotbar("SaleCondition") #to find how to aggregate
+fct_collapse(SaleCondition,Abnormal= c("Abnorml","AdjLand","Alloca","Family"),Normal="Normal", Partial="Partial")
+
+#SaleType
+plotbar("SaleType") #to find how to aggregate
+fct_collapse(SaleType,New = "New",Warranty = c("WD","CWD", "VWD"), Others = c ("COD", "Con", "ConLw", "ConLl", "ConLD", "Oth"))
+
+#Fence
+plotbar("Fence") #to find how to aggregate
+fct_collapse(Fence,No ="0",Good = c("GdPrv","GdWo"),Mini = c("MnPrv","MnWw"))
+
+#GarageType
+plotbar("GarageType")
+fct_collapse(GarageType,Attached = c("Attchd", "BuiltIn"),Detached = "Detchd",Other = c("CarPort","Basment","2Types"),None = "0")
+
+
+#FireplaceQu
+plotbar("FireplaceQu")
+fct_collapse(FireplaceQu,Good=c("Ex","Gd"), Aver = c("TA","Fa"), Bad=c("Po","0"))
+
+#Electrical
+plotbar("Electrical")
+fct_collapse(Electrical,Stand = "SBrkr", Fuse_Mix = c("FuseA","FuseF","FuseP", "Mix"))
+
+#HeatingQC
+plotbar("HeatingQC")
+fct_collapse(HeatingQC,Good =  c("Ex","Gd"),	Ave = "TA",	Bad = c("Fa","Po"))
+
+#"BsmtExposure"
+plotbar("BsmtExposure")
+fct_collapse(BsmtExposure, Good =  "Gd",AbovMin = c("Av","Mn"), NoE = "No", NoB = "0")
+
+#"BsmtCond"
+plotbar("BsmtCond")
+fct_collapse(BsmtCond, Typical = "TA",NonTy = c("Ex","Gd","Fa","Po","0"))
+
+#"BsmtQual"
+plotbar("BsmtQual")
+fct_collapse(BsmtQual,Good=c("Ex","Gd"),	Aver = c("TA","Fa"),	Bad=c("Po","0"))
+
+
+#"Foundation"
+plotbar("Foundation")
+fct_collapse(Foundation,BrkTil= "BrkTil",CBlock = "CBlock",PConc = "PConc",Oth = c("Slab","Stone","Wood"))
+
+#"ExterCond"
+plotbar("ExterCond")
+fct_collapse(ExterCond,Good =  c("Ex","Gd"),	Ave = "TA",	Bad = c("Fa","Po"))
+
+#ExterQual
+plotbar("ExterQual")
+fct_collapse(ExterQual,Good =  c("Ex","Gd"), Ave = "TA",	Bad = c("Fa","Po"))
+
+#"MasVnrType"
+plotbar("MasVnrType")
+fct_collapse(MasVnrType, Brk= c("BrkCmn","BrkFace")	,Stone = "Stone",	Other = c("CBlock", "None"))
+
+#"Exterior1st"
+plotbar("Exterior1st")
+fct_collapse(Exterior1st, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+
+#"Exterior2nd"
+plotbar("Exterior2nd")
+fct_collapse(Exterior2nd, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+
+#"RoofStyle"
+plotbar("RoofStyle")
+fct_collapse(RoofStyle,Gable = "Gable",	Hip = "Hip",	Others = c ("Flat","Gambrel","Mansard","Shed"))
+
+#"HouseStyle"
+plotbar("HouseStyle")
+fct_collapse(HouseStyle,OneStory = "1Story", OnenHalfStory = c ("1.5Fin", "1.5Unf")	, TwoStory = "2Story"	, TwonHalfStory = c ("2.5 Fin", "2.5Unf"),	Split = c("SFoyer", "SLvl"))
+
+
+#"BldgType"
+plotbar("BldgType")
+fct_collapse(BldgType,OneFam = "1Fam",	TwoFam = c ( "2FmCon", "Duplex") 	, Twn = c ( "TwnhsE", "Twnhsl"))
+
+#"Condition1"
+plotbar("Condition1")
+fct_collapse(Condition1, Norm = "Norm", Other = c ("Artery", "Feedr", "RRNn", "RRAn", "PosN","PosA", "RRNe", "RRAe"))
+
+#"Neighborhood"
+plotbar("Neighborhood")
+fct_collapse(Neighborhood, North = c ("NWAmes", "NAmes", "NoRidge", "NPkVill", "NridgHt", "Somerst"),	West = c ("Sawyer", "SawyerW", "Gilbert", "SWISU", "Timber"),	East = c ("Edwards", "BrkSide", "Blueste", "BrDale", "IDOTRR", "MeadowV"),	Central = c("OldTown", "CollgCr", "Crawfor", "Mitchel"),	HighEnd = c ("Veenker", "StoneBr", "ClearCr"), Other = c ("Blmngtn"))
+
+#"LotConfig"
+plotbar("LotConfig")
+fct_collapse(LotConfig,Standard = c ("Inside", "Corner"),	Premium = c ("CulDSac", "FR2", "FR3"))
+
+#"LotShape"
+plotbar("LotShape")
+fct_collapse(LotShape,Regular = "Reg", Irregular = c("IR1","IR2","IR3"))
+
+#"MSZoning"
+plotbar("MSZoning")
+fct_collapse(MSZoning,Residentiallow = c ("RL", "RP")	,ResidentialMedHi = c ("RM", "RH") ,	Other = c( "FV", "A", "I", "C")	)
+
+```
+
