@@ -275,7 +275,7 @@ test.cl$SaleCondition <- fct_collapse(test$SaleCondition,Abnormal= c("Abnorml","
 
 #SaleType
 #plotbar("SaleType") #to find how to aggregate
-test.cl$SaleType <- fct_collapse(test$SaleType,New = "New",Warranty = c("WD","CWD", "VWD"), Others = c ("COD", "Con", "ConLw", "ConLl", "ConLD", "Oth"))
+test.cl$SaleType <- fct_collapse(test$SaleType,New = "New",Warranty = c("WD","CWD", "VWD"), Others = c ("COD", "Con", "ConLw", "ConLl", "ConLD", "Oth",0))
 
 #Fence
 #plotbar("Fence") #to find how to aggregate
@@ -333,11 +333,11 @@ test.cl$MasVnrType <- fct_collapse(test$MasVnrType, Brk= c("BrkCmn","BrkFace")	,
 
 #"Exterior1st"
 #plotbar("Exterior1st")
-test.cl$Exterior1st <- fct_collapse(test$Exterior1st, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+test.cl$Exterior1st <- fct_collapse(test$Exterior1st, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other",0) )
 
 #"Exterior2nd"
 #plotbar("Exterior2nd")
-test.cl$Exterior2nd <- fct_collapse(test$Exterior2nd, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+test.cl$Exterior2nd <- fct_collapse(test$Exterior2nd, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other",0) )
 
 #"RoofStyle"
 #plotbar("RoofStyle")
@@ -370,7 +370,7 @@ test.cl$LotShape <- fct_collapse(test$LotShape,Regular = "Reg", Irregular = c("I
 
 #"MSZoning"
 #plotbar("MSZoning")
-test.cl$MSZoning <- fct_collapse(test$MSZoning,Residentiallow = c ("RL", "RP")	,ResidentialMedHi = c ("RM", "RH") ,	Other = c( "FV", "A", "I", "C")	)
+test.cl$MSZoning <- fct_collapse(test$MSZoning,Residentiallow = c ("RL", "RP")	,ResidentialMedHi = c ("RM", "RH") ,	Other = c( "FV", "A", "I", "C",0)	)
 
 #"MSSubClass"
 #plotbar("MSSubClass")
@@ -402,7 +402,18 @@ plot(linbase)
 plot(linlog)
 ```
 
-By visual inspection, the models seem similar, though the log outcome variable may be slightly more appropriate, which aligns with our intuition that prices should be measured on a log scale.
+By visual inspection, the models seem similar, though the log outcome variable may be slightly more appropriate, which aligns with our intuition that prices should be measured on a log scale. 
+
+### Kaggle Submission - Linear Regression
+
+```{r}
+outlin <- test[1]
+#exponentiate predictions
+outlin$SalePrice <- exp(predict(linlog, test.cl))
+write.csv(outlin, "outlinlog", row.names=FALSE)
+```
+
+This submission had an RMSE of 0.14107 (so an MSE of 0.01990074).
 
 ## LASSO/ridge/elastic net - Ari
 
@@ -550,6 +561,17 @@ mean(boost$cv.error)
 ```
 With 5-fold cross-validation, the MSE was 0.01866449. This is a dramatic improvement from the single tree.
 
+### Kaggle Submission - Boosting
+
+```{r}
+outboost <- test[1]
+#exponentiate predictions
+outboost$SalePrice <- exp(predict(boost ,newdata = test.cl, n.trees = 5000))
+write.csv(outboost, "outboost.csv0.13944", row.names=FALSE)
+```
+
+This submission had an RMSE of 0.13944 (so an MSE of 0.01944351)
+
 ## Support Vector Machines
 
 ```{r}
@@ -565,6 +587,17 @@ summary(svm.linear)
 ```
 
 10-fold cross validation indicated that using a cost of 1 was ideal for a Support Vector Regression with a radial kernel, having an MSE of 0.01731201. By contrast, a cost of 5 was ideal for a SVR with a linear kernel, corresponding with an MSE of 0.02176070.
+
+### Kaggle Submission - SVM (radial)
+
+```{r}
+outsvm.rad <- test[1]
+#exponentiate predictions
+outsvm.rad$SalePrice <- exp(predict(svm.radial ,newdata = test.cl))
+write.csv(outsvm.rad, "outsvmrad.csv", row.names=FALSE)
+```
+
+This performed MUCH worse than other submissions, with an RMSE of 0.41565 (so an MSE of 0.1727649). Perhaps the data was overfitted. 
 
 ## kNN
 
@@ -586,3 +619,4 @@ mod_knn
 ```
 
 The optimal value for K was 10 (when testing a range from 1 to 15), with a 10-fold CV RMSE of 0.1832944, notably much higher than other types of models.
+
