@@ -211,6 +211,172 @@ plotbar("MSSubClass")
 data.cl$MSSubClass <- fct_collapse(MSSubClass, story1=c(20,30,40,120), story1.5=c(45,50,150),story2=c(60,70,160),other=c(75,80,85,90,180,190))
 ```
 
+## Preparing the test data
+
+Here, I redo all of the cleaning steps, but with the test data instead
+```{r}
+test <- read.csv("test.csv")
+test[is.na(test)]<-0
+
+# factor the appropriate columns
+test$MSSubClass <- factor(test$MSSubClass)
+test$MSZoning <- factor(test$MSZoning)
+test$Street <- factor(test$Street)
+test$Alley <- factor(test$Alley)
+test$LotShape <- factor(test$LotShape)
+test$LandContour <- factor(test$LandContour)
+test$Utilities <- factor(test$Utilities)
+test$LotConfig <- factor(test$LotConfig)
+test$LandSlope <- factor(test$LandSlope)
+test$Neighborhood <- factor(test$Neighborhood)
+test$Condition1 <- factor(test$Condition1)
+test$Condition2 <- factor(test$Condition2)
+test$BldgType <- factor(test$BldgType)
+test$HouseStyle <- factor(test$HouseStyle)
+test$RoofStyle <- factor(test$RoofStyle)
+test$RoofMatl <- factor(test$RoofMatl)
+test$Exterior1st <- factor(test$Exterior1st)
+test$Exterior2nd <- factor(test$Exterior2nd)
+test$MasVnrType <- factor(test$MasVnrType)
+test$ExterQual <- factor(test$ExterQual)
+test$ExterCond <- factor(test$ExterCond)
+test$Foundation <- factor(test$Foundation)
+test$BsmtQual <- factor(test$BsmtQual)
+test$BsmtCond <- factor(test$BsmtCond)
+test$BsmtExposure <- factor(test$BsmtExposure)
+test$BsmtFinType1 <- factor(test$BsmtFinType1)
+test$BsmtFinType2 <- factor(test$BsmtFinType2)
+test$Heating <- factor(test$Heating)
+test$HeatingQC <- factor(test$HeatingQC)
+test$CentralAir <- factor(test$CentralAir)
+test$Electrical <- factor(test$Electrical)
+test$KitchenQual <- factor(test$KitchenQual)
+test$Functional <- factor(test$Functional)
+test$FireplaceQu <- factor(test$FireplaceQu)
+test$GarageType <- factor(test$GarageType)
+test$GarageFinish <- factor(test$GarageFinish)
+test$GarageQual <- factor(test$GarageQual)
+test$GarageCond <- factor(test$GarageCond)
+test$PavedDrive <- factor(test$PavedDrive)
+test$PoolQC <- factor(test$PoolQC)
+test$Fence <- factor(test$Fence)
+test$MiscFeature <- factor(test$MiscFeature)
+test$SaleType <- factor(test$SaleType)
+test$SaleCondition <- factor(test$SaleCondition)
+
+# Clearing test - Lily
+library(forcats)
+
+test.cl <- test[!sapply(test,is.factor)][-1]
+
+#SaleCondition
+#plotbar("SaleCondition") #to find how to aggregate
+test.cl$SaleCondition <- fct_collapse(test$SaleCondition,Abnormal= c("Abnorml","AdjLand","Alloca","Family"),Normal="Normal", Partial="Partial")
+
+#SaleType
+#plotbar("SaleType") #to find how to aggregate
+test.cl$SaleType <- fct_collapse(test$SaleType,New = "New",Warranty = c("WD","CWD", "VWD"), Others = c ("COD", "Con", "ConLw", "ConLl", "ConLD", "Oth"))
+
+#Fence
+#plotbar("Fence") #to find how to aggregate
+test.cl$Fence <- fct_collapse(test$Fence,No ="0",Good = c("GdPrv","GdWo"),Mini = c("MnPrv","MnWw"))
+
+#PavedDrive
+#plotbar("PavedDrive") #to find how to aggregate
+test.cl$PavedDrive <- fct_collapse(test$PavedDrive,NP= c("N","P"))
+
+#GarageType
+#plotbar("GarageType")
+test.cl$GarageType <- fct_collapse(test$GarageType,Attached = c("Attchd", "BuiltIn"),Detached = "Detchd",Other = c("CarPort","Basment","2Types"),None = "0")
+
+
+#FireplaceQu
+#plotbar("FireplaceQu")
+test.cl$FireplaceQu <- fct_collapse(test$FireplaceQu,Good=c("Ex","Gd"), Aver = c("TA","Fa"), Bad=c("Po","0"))
+
+#Electrical
+#plotbar("Electrical")
+test.cl$Electrical <- fct_collapse(test$Electrical,Stand = "SBrkr", Other = c("FuseA","FuseF","FuseP", "Mix",0))
+
+#HeatingQC
+#plotbar("HeatingQC")
+test.cl$HeatingQC <- fct_collapse(test$HeatingQC,Good =  c("Ex","Gd"),	Ave = "TA",	Bad = c("Fa","Po"))
+
+#"BsmtExposure"
+#plotbar("BsmtExposure")
+test.cl$BsmtExposure <- fct_collapse(test$BsmtExposure, Good =  "Gd",AbovMin = c("Av","Mn"), NoE = "No", NoB = "0")
+
+#"BsmtCond"
+#plotbar("BsmtCond")
+test.cl$BsmtCond <- fct_collapse(test$BsmtCond, Typical = "TA",NonTy = c("Ex","Gd","Fa","Po","0"))
+
+#"BsmtQual"
+#plotbar("BsmtQual")
+test.cl$BsmtQual <- fct_collapse(test$BsmtQual,Good=c("Ex","Gd"),	Aver = c("TA","Fa"),	Bad=c("Po","0"))
+
+
+#"Foundation"
+#plotbar("Foundation")
+test.cl$Foundation <- fct_collapse(test$Foundation,BrkTil= "BrkTil",CBlock = "CBlock",PConc = "PConc",Oth = c("Slab","Stone","Wood"))
+
+#"ExterCond"
+#plotbar("ExterCond")
+test.cl$ExterCond <- fct_collapse(test$ExterCond,Good =  c("Ex","Gd"),	Ave = "TA",	Bad = c("Fa","Po"))
+
+#ExterQual
+#plotbar("ExterQual")
+test.cl$ExterQual <- fct_collapse(test$ExterQual,Good =  c("Ex","Gd"), Ave = "TA",	Bad = c("Fa","Po"))
+
+#"MasVnrType"
+#plotbar("MasVnrType")
+test.cl$MasVnrType <- fct_collapse(test$MasVnrType, Brk= c("BrkCmn","BrkFace")	,Stone = "Stone",	Other = c("CBlock", "None"))
+
+#"Exterior1st"
+#plotbar("Exterior1st")
+test.cl$Exterior1st <- fct_collapse(test$Exterior1st, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+
+#"Exterior2nd"
+#plotbar("Exterior2nd")
+test.cl$Exterior2nd <- fct_collapse(test$Exterior2nd, Brk = c("BrkComm","BrkFace"), Wood = c("Wd Sdng", "WdShing","HdBoard","Plywood"), Vinyl = "VinylSd", Metal = "MetalSd", Stone_Cement = c("Stone","CemntBd", "CBlock","PreCast"), Other = c("AsbShng","AsphShn","ImStucc","Stucco","Other") )
+
+#"RoofStyle"
+#plotbar("RoofStyle")
+test.cl$RoofStyle <- fct_collapse(test$RoofStyle,Gable = "Gable",	Hip = "Hip",	Others = c ("Flat","Gambrel","Mansard","Shed"))
+
+#"HouseStyle"
+#plotbar("HouseStyle")
+test.cl$HouseStyle <- fct_collapse(test$HouseStyle,OneStory = "1Story", OnenHalfStory = c ("1.5Fin", "1.5Unf")	, TwoStory = "2Story"	, TwonHalfStory = c ("2.5 Fin", "2.5Unf"),	Split = c("SFoyer", "SLvl"))
+
+
+#"BldgType"
+#plotbar("BldgType")
+test.cl$BldgType <- fct_collapse(test$BldgType,OneFam = "1Fam",	TwoFam = c ( "2FmCon", "Duplex") 	, Twn = c ( "TwnhsE", "Twnhsl"))
+
+#"Condition1"
+#plotbar("Condition1")
+test.cl$Condition1 <- fct_collapse(test$Condition1, Norm = "Norm", Other = c ("Artery", "Feedr", "RRNn", "RRAn", "PosN","PosA", "RRNe", "RRAe"))
+
+#"Neighborhood"
+#plotbar("Neighborhood")
+test.cl$Neighborhood <- fct_collapse(test$Neighborhood, North = c ("NWAmes", "NAmes", "NoRidge", "NPkVill", "NridgHt", "Somerst"),	West = c ("Sawyer", "SawyerW", "Gilbert", "SWISU", "Timber"),	East = c ("Edwards", "BrkSide", "Blueste", "BrDale", "IDOTRR", "MeadowV"),	Central = c("OldTown", "CollgCr", "Crawfor", "Mitchel"),	HighEnd = c ("Veenker", "StoneBr", "ClearCr"), Other = c ("Blmngtn"))
+
+#"LotConfig"
+#plotbar("LotConfig")
+test.cl$LotConfig <- fct_collapse(test$LotConfig,Standard = c ("Inside", "Corner"),	Premium = c ("CulDSac", "FR2", "FR3"))
+
+#"LotShape"
+#plotbar("LotShape")
+test.cl$LotShape <- fct_collapse(test$LotShape,Regular = "Reg", Irregular = c("IR1","IR2","IR3"))
+
+#"MSZoning"
+#plotbar("MSZoning")
+test.cl$MSZoning <- fct_collapse(test$MSZoning,Residentiallow = c ("RL", "RP")	,ResidentialMedHi = c ("RM", "RH") ,	Other = c( "FV", "A", "I", "C")	)
+
+#"MSSubClass"
+#plotbar("MSSubClass")
+test.cl$MSSubClass <- fct_collapse(test$MSSubClass, story1=c(20,30,40,120), story1.5=c(45,50,150),story2=c(60,70,160),other=c(75,80,85,90,180,190))
+```
+
 ## linear regression - Ari
 
 Since the outcome variable is housing prices, we will examine whether log transformation of the outcome variable will better fit our data:
