@@ -405,12 +405,13 @@ summary(svm.linear)
 ```{r}
 library(class)
 library(caret)
+library(fastDummies)
 ```
 
 Use k-fold KNN to identify the best model:
 
 ```{r, echo=FALSE}
-fullfactors <- append(sapply(data.cl,is.factor),rep(FALSE,158-62))
+fullfactors <- append(sapply(data.cl,is.factor),rep(FALSE,158-62)) #hardcoding based on the number of original columns and the number of columns resulting from using dummy_columns()
 dummydata <- dummy_columns(data.cl)[!fullfactors]
 
 mod_knn = train(x = dummydata,y = log(dummydata$SalePrice),method = "knn", preProcess = c("center", "scale"), tuneGrid = data.frame(k = c(1:15)), trControl = trainControl(method = "repeatedcv", number = 10, repeats = 3))
