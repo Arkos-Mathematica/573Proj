@@ -399,3 +399,23 @@ summary(svm.linear)
 ```
 
 10-fold cross validation indicated that using a cost of 1 was ideal for a Support Vector Regression with a radial kernel, having an MSE of 0.01731201. By contrast, a cost of 5 was ideal for a SVR with a linear kernel, corresponding with an MSE of 0.02176070.
+
+## kNN
+
+```{r}
+library(class)
+library(caret)
+```
+
+Use k-fold KNN to identify the best model:
+
+```{r, echo=FALSE}
+fullfactors <- append(sapply(data.cl,is.factor),rep(FALSE,158-62))
+dummydata <- dummy_columns(data.cl)[!fullfactors]
+
+mod_knn = train(x = dummydata,y = log(dummydata$SalePrice),method = "knn", preProcess = c("center", "scale"), tuneGrid = data.frame(k = c(1:15)), trControl = trainControl(method = "repeatedcv", number = 10, repeats = 3))
+
+mod_knn
+```
+
+The optimal value for K was 10 (when testing a range from 1 to 15), with a 10-fold CV RMSE of 0.1832944, notably much higher than other types of models.
