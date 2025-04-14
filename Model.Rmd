@@ -578,7 +578,7 @@ With 5-fold cross-validation, the MSE was 0.01833493. This is a dramatic improve
 outboost <- test[1]
 #exponentiate predictions
 outboost$SalePrice <- exp(predict(boost ,newdata = test.cl, n.trees = 5000))
-write.csv(outboost, "outboost.csv0.13944", row.names=FALSE)
+write.csv(outboost, "outboost.csv", row.names=FALSE)
 ```
 
 This submission had an RMSE of 0.13944 (so an MSE of 0.01944351)
