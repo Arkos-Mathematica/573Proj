@@ -9,6 +9,7 @@ date: "`r Sys.Date()`"
 ## Preparing the Data
 
 ```{r}
+set.seed(1)
 data <- read.csv("train.csv")
 data[is.na(data)]<-0
 
@@ -441,7 +442,17 @@ cv.out$lambda.min
 min(cv.out$cvm)
 ```
 
-Using a lasso regression, the lowest mean Cross-Validated error is 0.02154846, with lambda of 0.003751818
+Using a lasso regression, the lowest mean Cross-Validated error is 0.02197524, with lambda of 0.003751818.
+
+#### Kaggle Submission - Lasso
+
+```{r}
+outlasso <- test[1]
+#exponentiate predictions
+outlasso$SalePrice <- exp(predict(lasso.mod, s = cv.out$lambda.min, newx = model.matrix(test$Id~., test.cl)))
+write.csv(outlasso, "outlasso.csv", row.names=FALSE)
+```
+
 
 ### Ridge
 
@@ -460,7 +471,7 @@ cv.out$lambda.min
 min(cv.out$cvm)
 ```
 
-Using a ridge regression, the lowest mean Cross-Validated error is 0.02218426, with lambda of 0.0625841
+Using a ridge regression, the lowest mean Cross-Validated error is 0.02179968, with lambda of 0.0570243.
 
 ### Elastic Net
 
@@ -479,7 +490,7 @@ cv.out$lambda.min
 min(cv.out$cvm)
 ```
 
-Using an elastic net with alpha of 0.5, the lowest mean Cross-Validated error is 0.02203126, with lambda of 0.005171966.
+Using an elastic net with alpha of 0.5, the lowest mean Cross-Validated error is 0.02173416, with lambda of 0.007503637.
 
 ## PCR and PLS - Ari
 
@@ -495,7 +506,7 @@ summary(pcr.fit)
 validationplot(pcr.fit, val.type = "MSEP")
 ```
 
-We see that the CV levels out at around 9 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 9 components is $0.1589^2 = 0.02524921$, which is higher than the lasso, ridge, and elastic net regressions.
+We see that the CV levels out at around 9 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 9 components is $0.1586^2 = 0.02515396$, which is higher than the lasso, ridge, and elastic net regressions.
 
 Since we have an outcome variable, supervised learning is possible. Consequently, Partial Least Squares is preferred to Principal Component Analysis.
 
@@ -505,7 +516,7 @@ summary(pls.fit)
 validationplot(pls.fit, val.type = "MSEP")
 ```
 
-We see that the CV levels out at around 3 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 3 components is $0.1520^2 = 0.023104$, which is higher than the lasso, ridge, and elastic net regressions, but lower than PCR.
+We see that the CV levels out at around 3 components, with few, if any, improvements to CV beyond that point. The CV-derived MSE associated with 3 components is $0.1521^2 = 0.02313441$, which is higher than the lasso, ridge, and elastic net regressions, but lower than PCR.
 
 ## regression trees and random forests
 
@@ -536,7 +547,7 @@ plot(pruned)
 text(pruned, pretty = 0)
 ```
 
-Referring back to the cross-validation, we see that thesum of squared errors for the size-eleven tree is 77.12415. To get the *Mean Squared Error* we divide by the number of observations: $\frac{77.12415}{1460} =  0.05282476$. This is considerably worse than dimension reduction or regularization approaches, as would be expected.
+Referring back to the cross-validation, we see that the sum of squared errors for the size-eleven tree is 77.12415. To get the *Mean Squared Error* we divide by the number of observations: $\frac{71.06924}{1460} = 0.04867756$. This is considerably worse than dimension reduction or regularization approaches, as would be expected.
 
 ### Random Forest
 
@@ -547,7 +558,7 @@ varImpPlot(rf)
 mean(rf$mse)
 ```
 
-MSE [appears to be](https://datajobs.com/data-science-repo/Random-Forest-%5bLiaw-and-Weiner%5d.pdf) based on out of bag predictions, so I use that in lieu of K-fold cross validation to get an MSE of 0.02006823, which is competitive with — if not better than — dimension reduction or regularization approaches.
+MSE [appears to be](https://datajobs.com/data-science-repo/Random-Forest-%5bLiaw-and-Weiner%5d.pdf) based on out of bag predictions, so I use that in lieu of K-fold cross validation to get an MSE of 0.0202643, which is competitive with — if not better than — dimension reduction or regularization approaches.
 
 ## Boosting
 
@@ -559,7 +570,7 @@ plot(boost, i = "OverallQual")
 plot(boost, i = "GrLivArea")
 mean(boost$cv.error)
 ```
-With 5-fold cross-validation, the MSE was 0.01866449. This is a dramatic improvement from the single tree.
+With 5-fold cross-validation, the MSE was 0.01833493. This is a dramatic improvement from the single tree.
 
 ### Kaggle Submission - Boosting
 
@@ -582,11 +593,11 @@ svm.radial <- svm(log(SalePrice)~., data = data.cl, kernel = "radial", scale = T
 summary(svm.radial)
 tune.svm.lin <- tune(svm, log(SalePrice)~., data = data.cl, kernel = "linear", ranges = list(cost = c(0.0001, 0.001, 0.01, 0.1, 1, 5, 10)))
 summary(tune.svm.lin)
-svm.linear <- svm(log(SalePrice)~., data = data.cl, kernel = "linear", cost = 5)
+svm.linear <- svm(log(SalePrice)~., data = data.cl, kernel = "linear", cost = 1)
 summary(svm.linear)
 ```
 
-10-fold cross validation indicated that using a cost of 1 was ideal for a Support Vector Regression with a radial kernel, having an MSE of 0.01731201. By contrast, a cost of 5 was ideal for a SVR with a linear kernel, corresponding with an MSE of 0.02176070.
+10-fold cross validation indicated that using a cost of 1 was ideal for a Support Vector Regression with a radial kernel, having an MSE of 0.01722402. Similarly, a cost of 1 was ideal for a SVR with a linear kernel, corresponding with an MSE of 0.02182551.
 
 ### Kaggle Submission - SVM (radial)
 
@@ -618,5 +629,5 @@ mod_knn = train(x = dummydata,y = log(dummydata$SalePrice),method = "knn", prePr
 mod_knn
 ```
 
-The optimal value for K was 10 (when testing a range from 1 to 15), with a 10-fold CV RMSE of 0.1832944, notably much higher than other types of models.
+The optimal value for K was 11 (when testing a range from 1 to 15), with a 10-fold CV RMSE of 0.1823653, notably much higher than other types of models.
 
